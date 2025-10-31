@@ -18,10 +18,10 @@ export const SocketProvider = ({ children }) => {
       import.meta.env.VITE_BACKEND_URL || "http://localhost:5000"
     );
     newSocket.on("connect", () =>
-      console.log("🟢 Socket connected:", newSocket.id)
+      console.log("Socket connected:", newSocket.id)
     );
     newSocket.on("connect_error", (err) =>
-      console.error("❌ Connection error:", err.message)
+      console.error("Connection error:", err.message)
     );
     setSocket(newSocket);
     return () => newSocket.disconnect();
