@@ -10,17 +10,23 @@ dotenv.config();
 
 const app = express();
 
-// Convert comma-separated ORIGIN env var into an array
 const allowedOrigins = process.env.ORIGIN?.split(",") || [];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("CORS not allowed"));
+      }
+    },
     methods: ["GET", "POST"],
+    credentials: true,
   })
 );
 
-// Create HTTP server & bind Socket.io
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -30,11 +36,14 @@ const io = new Server(server, {
   },
 });
 
-// Register socket logic
+io.on("connection", (socket) => {
+  log(`New socket connected: ${socket.id}`);
+});
+
 registerSocketHandlers(io);
 
-// Simple test endpoint
-app.get("/", (req, res) => res.send("✅ WatchParty backend is running"));
+// Test route for quick checks
+app.get("/", (req, res) => res.send("WatchParty backend is running"));
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => log(`Server running on port ${PORT}`));
